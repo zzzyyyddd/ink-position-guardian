@@ -59,3 +59,14 @@ Oracle source freshness/fallback validation, live adapter behavior on a network-
 The user reported that `node scripts/verify-tydro.mjs` succeeded from WSL with viem 2.58.1 at block 61561368, returning chain 57073, market ID `Aave V3 Ink Whitelabel Market`, the four addresses in the table above, base unit 100000000, and 14 reserves. This is a user-reported market probe result, not independently reproduced here and not a live test of the newly added `/api/position` route or browser view.
 
 The route now invokes the reconciled viem adapter and serializes only live results; failures return no position. The UI shows block timestamp and age, removes the snapshot after 120 seconds, and labels oracle feed freshness unknown. Recorded fixtures test mode separation, stale display, and errors offline. The pinned provider and implementation safeguards can cause a deliberate outage after an upgrade. The new dashboard integration and real multi-collateral positions still require the WSL checks in [README.md](README.md).
+
+
+## Live simulation implementation
+
+The simulator reuses the same `calculateProtocolAccount` arithmetic and first checks that the serialized active positions reproduce all four Pool account metrics. It then applies hypothetical token amounts and price changes to the snapshot, holding the E-mode category, collateral flags, and thresholds fixed. Deterministic tests cover multiple collateral and debt assets, E-mode eligibility, integer rounding, shocks and zero debt. Existing recorded Pool fixture tests remain the evidence for baseline reconciliation; the multi-asset scenario is synthetic, not an independently observed mainnet account or an onchain execution. No source timestamp is supplied by the protocol price call.
+
+The official [Tydro terms](https://tydro.com/terms-of-service) identify [app.tydro.com](https://app.tydro.com/) as its interface. Guardian links only to the app home and does not construct transaction links. No analytics are collected; the README records a proposed measurement plan, not results.
+
+## Live adapter verification on 2026-11-19
+
+A read-only `npm run test:live` run against Ink RPC for the public recorded account succeeded at block **61580078**. The Pool and adapter both returned collateral `8293205876251266`, debt `7461313754214362`, weighted threshold `9200` bps, and health factor `1022574530100904211` (18 decimals), with E-mode category 5. This checks the adapter at that block, not the browser or API route end to end, a multi-collateral position, or oracle feed freshness. These values are a historical observation and will change.

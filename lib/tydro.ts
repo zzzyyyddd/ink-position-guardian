@@ -73,5 +73,5 @@ export async function readTydroPosition(client: PublicClient, wallet: string, no
  const confirmedBlock=await client.getBlock({blockNumber});
  if(confirmedBlock.hash!==block.hash) throw Error('RPC block changed during position read');
  if(!isFreshBlockTimestamp(block.timestamp,BigInt(nowSeconds)+BigInt(Math.floor((Date.now()-startedAt)/1000)))) throw Error('RPC block became stale or has an invalid timestamp during position read');
- return {wallet:user,blockNumber,blockHash:block.hash,blockTimestamp:block.timestamp,baseCurrency:base,baseUnit:unit,emode:emodeId,collateralBitmap:bitmap,protocol:{collateral:account[0],debt:account[1],liquidationThreshold:account[3],healthFactor:account[5]},positions,computed,oracleFreshness:'unknown' as const};
+ return {wallet:user,blockNumber,blockHash:block.hash,blockTimestamp:block.timestamp,baseCurrency:base,baseUnit:unit,emode:emodeId,collateralBitmap:bitmap,emodeLiquidationThreshold:BigInt(emodeConfig.liquidationThreshold),protocol:{collateral:account[0],debt:account[1],liquidationThreshold:account[3],healthFactor:account[5]},positions,computed,oracleFreshness:'unknown' as const};
 }

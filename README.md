@@ -21,7 +21,7 @@ npm run dev
 
 Open http://localhost:3000. The server defaults to Ink's public `https://rpc-gel.inkonchain.com`. Optionally set server-side `INK_RPC_URL` to a trusted Ink Mainnet HTTPS endpoint; see `.env.example`. The address in a shareable URL is public, and the RPC provider receives the queried address. Public RPC endpoints may impose rate limits.
 
-Start in the labeled synthetic demo, or submit a valid Ethereum address for live mode. Demo data and simulations are fictional and never used as live data. Stress tests, repayment and collateral simulations, and session-only demo alerts are disabled in live mode. Live mode shows token amounts truncated to six decimals; values come from one block. An empty wallet is shown as empty, not populated with examples.
+Start in the labeled synthetic demo, or submit a valid Ethereum address for live mode. Demo data is fictional and never used as live data. Live scenarios start from the reconciled snapshot and are explicitly hypothetical. Live mode supports hypothetical price changes, repayments and additions based on the verified snapshot. Demo alerts remain synthetic and session-only. Live mode shows token amounts truncated to six decimals; values come from one block. An empty wallet is shown as empty, not populated with examples.
 
 ## Live verification and safety checks
 
@@ -54,3 +54,9 @@ Open `http://localhost:3000/?address=0xc468315a2df54f9c076bd5cfe5002ba211f74ca6`
 ## Deployment
 
 No deployment or push has been performed. Vercel must support a Node.js server route and have access to a reliable Ink RPC. After explicit approval, connect a GitHub repository in Vercel, use the Next.js preset and `npm run build`, optionally configure `INK_RPC_URL` server-side, and validate the preview with real accounts, failure states, rate limits, and oracle freshness policies before production. This version is not yet recommended for production deployment as a risk dashboard.
+
+## Live simulations and measurement plan
+
+The live simulator applies whole-percent price changes from -99% to +100% to each active asset, including both sides when an asset is both supplied and borrowed. It accepts exact token amounts for repayment of existing variable debt and additions to already enabled collateral. It recomputes using the same integer arithmetic, E-mode bitmap and thresholds as the baseline. It does not check whether a transaction could be executed, and no transaction is created. Interest, fees, liquidations, caps, liquidity, changes in protocol configuration, and future prices are excluded. The simulator disappears when the snapshot expires.
+
+No analytics are implemented and no usage is claimed. Before enabling measurement, choose a privacy-preserving, consent-appropriate provider and document retention and access controls. Measure aggregate daily unique visits using a short-lived, rotating anonymous identifier (subject to consent where required); count successful live lookups, first simulation interaction per session, and clicks on the official Tydro link as separate events. Never send wallet addresses, address-bearing URLs, full referrers, IP addresses, scenario values, or transaction data to analytics. Strip query strings at collection and verify this with network inspection and provider configuration before enabling any event. Publish counts only after collection begins, state the time window and deduplication method, and avoid equating visits or clicks with distinct people or completed Tydro actions. Server/RPC logs and the shareable address URL remain separate privacy considerations.
