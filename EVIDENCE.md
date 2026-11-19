@@ -70,3 +70,8 @@ The official [Tydro terms](https://tydro.com/terms-of-service) identify [app.tyd
 ## Live adapter verification on 2026-11-19
 
 A read-only `npm run test:live` run against Ink RPC for the public recorded account succeeded at block **61580078**. The Pool and adapter both returned collateral `8293205876251266`, debt `7461313754214362`, weighted threshold `9200` bps, and health factor `1022574530100904211` (18 decimals), with E-mode category 5. This checks the adapter at that block, not the browser or API route end to end, a multi-collateral position, or oracle feed freshness. These values are a historical observation and will change.
+
+
+## Risk Action Plan evidence and boundaries
+
+The action plan uses the existing live simulation as its only HF calculation, and checks baseline reconciliation before searching. Binary search operates on integer token units, with repayment bounded by recorded variable debt and all searches capped at `2^120 − 1` units. A result is evaluated again, as is one unit below it, and it is withheld if either check fails. A conservative uint256 intermediate check and bounded search can exclude extreme scenarios. The recorded category 5 fixture tests the plan against the Pool-reconciled baseline; hypothetical action outcomes are calculations, not observed or executed onchain transactions. Synthetic tests cover E-mode eligibility, multiple collateral and debt assets, shared collateral/debt, decimal rounding, impossible targets, no debt, bounds, missing prices and mismatches. They do not verify actual supply or repayment execution, caps, liquidity, wallet balances or oracle source freshness.

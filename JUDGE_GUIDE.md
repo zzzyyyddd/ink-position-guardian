@@ -8,3 +8,6 @@
 6. [EVIDENCE.md](EVIDENCE.md) documents official sources, arithmetic, e-mode, recorded request/response fixtures, and outstanding verification. The offline tests replay fixtures and do not claim a live browser or endpoint test.
 
 No wallet connection or transaction is involved. Live production use remains subject to the limitations in the README, particularly oracle freshness and the outstanding end-to-end and multi-collateral checks.
+
+
+7. In a fresh live position, open **Risk Action Plan** and select a target above the current HF. Repayment and addition rows are independent, hypothetical single-asset alternatives. Change the target, try an invalid custom value, and select an already-met target. Amounts use smallest token units, checked against the simulation; unavailable rows reflect search or arithmetic limits. No eligibility or wallet balance is verified. The plan expires with the snapshot and oracle source freshness remains unknown. See README for browser steps and limits.

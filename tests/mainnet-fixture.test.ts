@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { decodeFunctionResult, parseAbi } from 'viem';
 import { calculateProtocolAccount, type ProtocolAsset } from '../lib/protocol-math';
 import { simulateLive } from '../lib/live-simulation';
+import { createRiskActionPlan } from '../lib/risk-action-plan';
 import type { LiveSnapshot } from '../lib/live-api';
 import { formatHealthFactor } from '../lib/health-display';
 const responses = JSON.parse(readFileSync('evidence/reserves-response.json','utf8')).sort((a:{id:number},b:{id:number})=>a.id-b.id);
@@ -32,4 +33,8 @@ test('recorded pinned mainnet borrower values reconcile at the oracle base unit'
  const zero=simulateLive(snapshot,{});
  assert.equal(zero.simulated.healthFactor,account[5]);
  assert.equal(formatHealthFactor(zero.simulated.healthFactor),'1.022705');
+ const plan=createRiskActionPlan(snapshot,1200000000000000000n);
+ assert.equal(plan.baseline,account[5]);
+ assert.equal(plan.repayments[0].estimate.status,'available');
+ assert.equal(plan.additions[0].estimate.status,'available');
 });

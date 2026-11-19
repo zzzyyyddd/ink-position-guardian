@@ -36,3 +36,10 @@ test('zero-input E-mode scenario displays the Pool baseline at identical precisi
  assert.match(html,/Simulated interpretation: Critical/);
  assert.match(html,/not official Tydro classifications or guarantees/);
 });
+
+test('live action plan shows hypothetical alternatives and hides when the snapshot expires',()=>{
+ const position:LiveSnapshot={...fixture,protocol:{collateral:'100000000',debt:'100000000',liquidationThreshold:'9200',healthFactor:'920000000000000000'},positions:[{...fixture.positions[0],variableDebt:'1000000'}]};
+ const html=renderToStaticMarkup(<LiveSnapshotView snapshot={position} now={1001}/>);
+ assert.match(html,/Risk Action Plan/);assert.match(html,/Alternative 1: repay one debt asset/);assert.match(html,/Alternative 2: add one enabled collateral asset/);assert.match(html,/Hypothetical HF/);assert.match(html,/nothing is executed/);assert.match(html,/Oracle feed freshness is unknown/);
+ const stale=renderToStaticMarkup(<LiveSnapshotView snapshot={position} now={1121}/>);assert.doesNotMatch(stale,/Risk Action Plan/);
+});
