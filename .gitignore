@@ -1,0 +1,23 @@
+node_modules/
+.next/
+out/
+coverage/
+*.tsbuildinfo
+
+# Environment files may contain credentials; the example contains no secrets.
+.env*
+!.env.example
+
+# Local deployment configuration, credentials, and editor files.
+.vercel/
+.aws/
+.codex/
+.agents/
+*.pem
+*.key
+*.p12
+*.pfx
+*.log
+.DS_Store
+.vscode/
+.idea/

@@ -1,0 +1,11 @@
+import { test } from 'node:test';
+import { strict as assert } from 'node:assert';
+import { metrics, parseMoney, risk, type Asset } from '../lib/risk';
+const assets:Asset[]=[{symbol:'A',value:100000n,threshold:8000n,collateral:true,debt:0n},{symbol:'B',value:100000n,threshold:6000n,collateral:true,debt:0n},{symbol:'D',value:50000n,threshold:0n,collateral:false,debt:100000n}];
+test('weighted collateral excludes non-collateral supply',()=>{const m=metrics(assets);assert.equal(m.adjusted,140000n);assert.equal(m.weightedThreshold,7000n);assert.equal(m.health,14000n);assert.equal(m.supplied,250000n)});
+test('independent collateral and debt price shocks',()=>{const m=metrics(assets,{A:-2000n,D:-1000n});assert.equal(m.adjusted,124000n);assert.equal(m.debt,90000n);assert.equal(m.health,13777n)});
+test('repayment caps at debt, zero debt is infinite',()=>{assert.equal(metrics(assets,{},200000n).health,null);assert.equal(risk(null),'No debt')});
+test('added collateral uses selected threshold and shock',()=>{assert.equal(metrics(assets,{A:-1000n},0n,10000n,'A').adjusted,139200n)});
+test('risk boundaries',()=>{assert.equal(risk(9999n),'Liquidatable');assert.equal(risk(10000n),'Critical');assert.equal(risk(12000n),'At risk');assert.equal(risk(15000n),'Healthy')});
+test('money parser is exact and rejects invalid input',()=>{assert.equal(parseMoney('12.3'),1230n);assert.equal(parseMoney('0.01'),1n);for(const x of ['-1','1e3','1.001','','01','NaN'])assert.equal(parseMoney(x),null)});
+test('invalid shocks and values fail closed',()=>{assert.throws(()=>metrics(assets,{A:-10001n}));assert.throws(()=>metrics(assets,{},-1n))});
