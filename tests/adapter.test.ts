@@ -3,6 +3,8 @@ import { strict as assert } from 'node:assert';
 import { readFileSync } from 'node:fs';
 import { decodeFunctionResult, parseAbi, type PublicClient } from 'viem';
 import { CONTRACTS, readTydroPosition } from '../lib/tydro';
+import { toLiveSnapshot } from '../lib/live-api';
+import { createLiquidationBoundaries } from '../lib/liquidation-boundary';
 const json=(path:string)=>JSON.parse(readFileSync(path,'utf8'));
 const responses=json('evidence/reserves-response.json').sort((a:{id:number},b:{id:number})=>a.id-b.id);
 const requests=json('evidence/reserves-request.json');
@@ -33,6 +35,11 @@ function fixture(mismatch=false, timestamp=1000n, onConfirm?:()=>void) {
 }
 const user='0xc468315a2df54f9c076bd5cfe5002ba211f74ca6';
 test('adapter reconciles pinned recorded borrower data',async()=>{const r=await readTydroPosition(fixture(),user,1000);assert.equal(r.emode,5);assert.equal(r.computed.healthFactor,1022705031985276228n);assert.equal(r.positions.filter(p=>p.supply||p.variableDebt).length,2)});
+test('boundary calculation reconciles the recorded E-mode borrower through the adapter',async()=>{
+ const snapshot=toLiveSnapshot(await readTydroPosition(fixture(),user,1000));const data=createLiquidationBoundaries(snapshot);
+ assert.equal(data.baseline,1022705031985276228n);assert.equal(data.rows.length,1);const result=data.rows[0].result;
+ assert.equal(result.status,'available');if(result.status==='available'){assert.ok(result.healthFactor<10n**18n);assert.ok(result.adjacentHealthFactor>=10n**18n);assert.equal(result.adjacentPrice,result.price+1n);}
+});
 test('adapter rejects a mismatch and stale block',async()=>{await assert.rejects(readTydroPosition(fixture(true),user,1000),/does not match/);await assert.rejects(readTydroPosition(fixture(),user,1121),/stale/)});
 test('adapter enforces future skew and block age limits',async()=>{
  for(const [timestamp,passes] of [[1010n,true],[1030n,true],[1031n,false],[881n,true],[880n,true],[879n,false]] as const){
