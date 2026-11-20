@@ -18,9 +18,9 @@ function share(value:bigint|null,collateralValue:bigint) {
 
 export default function RiskFingerprint({snapshot}:{snapshot:LiveSnapshot}) {
  let fingerprint:ReturnType<typeof createRiskFingerprint>;
- try {fingerprint=createRiskFingerprint(snapshot)} catch {return <section className="panel fingerprint" aria-label="Tydro Risk Fingerprint"><h2>Tydro Risk Fingerprint</h2><p role="alert">Fingerprint unavailable: this snapshot could not be independently reconciled or contains unsupported data.</p></section>}
+ try {fingerprint=createRiskFingerprint(snapshot)} catch {return <section id="risk-fingerprint" className="panel fingerprint" aria-label="Tydro Risk Fingerprint"><h2>Tydro Risk Fingerprint</h2><p role="alert">Fingerprint unavailable: this snapshot could not be independently reconciled or contains unsupported data.</p></section>}
  const collateral=fingerprint.assets.filter(a=>a.collateral && a.supply>0n), disabled=fingerprint.assets.filter(a=>!a.collateral && a.supply>0n), debts=fingerprint.assets.filter(a=>a.debtValue>0n);
- return <section className="panel fingerprint" aria-label="Tydro Risk Fingerprint">
+ return <section id="risk-fingerprint" className="panel fingerprint" aria-label="Tydro Risk Fingerprint">
   <div className="panel-head"><div><div className="eyebrow muted">OBSERVED · BLOCK {snapshot.blockNumber}</div><h2>Tydro Risk Fingerprint</h2><p>Values use the protocol oracle at this snapshot. Oracle feed freshness is unknown.</p></div></div>
   <div className="fingerprint-grid"><div><h3>Enabled collateral concentration</h3>
    {collateral.length===0?<p>No enabled collateral in this snapshot.</p>:collateral.map(a=><div className="fingerprint-row" key={a.address}><strong>{label(a)}</strong><small>{a.address}</small><p>{base(a.collateralValue,snapshot.baseUnit)} · {share(a.collateralShareBps,a.collateralValue)}</p><p>{fingerprint.emode===0?'E-mode off':a.emodeEligible?'E-mode eligible':'Not eligible for this E-mode'} · effective liquidation threshold {formatUnits(a.effectiveThreshold,2)}%</p></div>)}

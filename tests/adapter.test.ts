@@ -5,6 +5,9 @@ import { decodeFunctionResult, parseAbi, type PublicClient } from 'viem';
 import { CONTRACTS, readTydroPosition } from '../lib/tydro';
 import { toLiveSnapshot } from '../lib/live-api';
 import { createLiquidationBoundaries } from '../lib/liquidation-boundary';
+import React from 'react';
+import { renderToStaticMarkup } from 'react-dom/server';
+import { LiveSnapshotView } from '../app/live-position';
 const json=(path:string)=>JSON.parse(readFileSync(path,'utf8'));
 const responses=json('evidence/reserves-response.json').sort((a:{id:number},b:{id:number})=>a.id-b.id);
 const requests=json('evidence/reserves-request.json');
@@ -39,6 +42,11 @@ test('boundary calculation reconciles the recorded E-mode borrower through the a
  const snapshot=toLiveSnapshot(await readTydroPosition(fixture(),user,1000));const data=createLiquidationBoundaries(snapshot);
  assert.equal(data.baseline,1022705031985276228n);assert.equal(data.rows.length,1);const result=data.rows[0].result;
  assert.equal(result.status,'available');if(result.status==='available'){assert.ok(result.healthFactor<10n**18n);assert.ok(result.adjacentHealthFactor>=10n**18n);assert.equal(result.adjacentPrice,result.price+1n);}
+});
+test('command center displays the recorded E-mode USDe and USD₮0 snapshot',async()=>{
+ const snapshot=toLiveSnapshot(await readTydroPosition(fixture(),user,1000));
+ const html=renderToStaticMarkup(React.createElement(LiveSnapshotView,{snapshot,now:1001}));
+ assert.match(html,/Liquidation Defense Command Center/);assert.match(html,/1\.022705/);assert.match(html,/Nearest verified conditional boundary/);assert.match(html,/Repay variable debt/);assert.match(html,/Add enabled collateral/);
 });
 test('adapter rejects a mismatch and stale block',async()=>{await assert.rejects(readTydroPosition(fixture(true),user,1000),/does not match/);await assert.rejects(readTydroPosition(fixture(),user,1121),/stale/)});
 test('adapter enforces future skew and block age limits',async()=>{
